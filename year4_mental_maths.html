@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Year 4 Mental Maths</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+            background: #eef2f7;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 24px 16px;
+        }
+
+        .screen { display: none; width: 100%; max-width: 580px; }
+        .screen.active { display: block; }
+
+        .card {
+            background: white;
+            border-radius: 24px;
+            padding: 36px 32px;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.10);
+        }
+
+        h1 { font-size: 1.9rem; color: #1a202c; margin-bottom: 6px; text-align: center; }
+        .subtitle { text-align: center; color: #718096; font-size: 1rem; margin-bottom: 28px; }
+
+        .instructions {
+            background: #ebf4ff;
+            border-left: 4px solid #4299e1;
+            border-radius: 12px;
+            padding: 18px 20px;
+            margin-bottom: 28px;
+            color: #2c5282;
+            line-height: 1.75;
+            font-size: 0.97rem;
+        }
+
+        .btn-primary {
+            background: #4299e1;
+            color: white;
+            border: none;
+            border-radius: 14px;
+            padding: 18px;
+            font-size: 1.15rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            transition: background 0.15s, transform 0.1s;
+        }
+        .btn-primary:active { background: #2b6cb0; transform: scale(0.98); }
+
+        .btn-secondary {
+            background: white;
+            color: #4299e1;
+            border: 2px solid #4299e1;
+            border-radius: 14px;
+            padding: 16px;
+            font-size: 1.05rem;
+            font-weight: 700;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 18px;
+        }
+
+        .progress-wrap { background: #e2e8f0; border-radius: 10px; height: 8px; margin-bottom: 18px; overflow: hidden; }
+        .progress-fill { background: #4299e1; height: 8px; border-radius: 10px; transition: width 0.4s ease; }
+
+        .q-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .q-counter { font-size: 0.95rem; font-weight: 600; color: #718096; }
+
+        .timer-ring { position: relative; width: 48px; height: 48px; }
+        .timer-ring svg { transform: rotate(-90deg); }
+        .timer-ring circle { fill: none; stroke-width: 4; }
+        .ring-bg { stroke: #e2e8f0; }
+        .ring-fg { stroke: #4299e1; stroke-linecap: round; transition: stroke-dashoffset 1s linear, stroke 0.3s; }
+        .timer-number { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 700; color: #2d3748; }
+
+        .question-box {
+            background: #f7fafc;
+            border: 2px solid #e2e8f0;
+            border-radius: 20px;
+            padding: 36px 28px;
+            margin-bottom: 18px;
+            min-height: 130px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .question-text { font-size: 1.75rem; color: #1a202c; font-weight: 700; text-align: center; line-height: 1.4; }
+
+        .time-up-notice {
+            display: none;
+            background: #fff5f5;
+            border: 2px solid #feb2b2;
+            border-radius: 12px;
+            padding: 12px 16px;
+            text-align: center;
+            color: #c53030;
+            font-weight: 600;
+            font-size: 0.95rem;
+            margin-bottom: 14px;
+        }
+
+        .answer-input {
+            width: 100%;
+            padding: 18px;
+            font-size: 1.5rem;
+            border: 3px solid #e2e8f0;
+            border-radius: 14px;
+            text-align: center;
+            outline: none;
+            background: white;
+            color: #1a202c;
+            margin-bottom: 14px;
+            -webkit-appearance: none;
+        }
+        .answer-input:focus { border-color: #4299e1; }
+
+        .score-wrap { display: flex; flex-direction: column; align-items: center; margin-bottom: 24px; }
+        .score-circle {
+            width: 130px; height: 130px; border-radius: 50%;
+            background: #ebf4ff; border: 6px solid #4299e1;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            margin-bottom: 14px;
+        }
+        .score-num { font-size: 2.6rem; font-weight: 800; color: #2b6cb0; line-height: 1; }
+        .score-denom { font-size: 0.9rem; color: #718096; }
+        .score-msg { color: #4a5568; font-size: 1rem; text-align: center; max-width: 340px; }
+
+        .table-wrap { overflow-x: auto; margin-top: 8px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th { background: #ebf4ff; color: #2b6cb0; padding: 11px 10px; text-align: left; font-weight: 700; }
+        td { padding: 11px 10px; border-bottom: 1px solid #e2e8f0; color: #4a5568; vertical-align: middle; }
+        tr.row-correct { background: #f0fff4; }
+        tr.row-wrong { background: #fff5f5; }
+        .tick { color: #38a169; font-size: 1.1rem; font-weight: 700; }
+        .cross { color: #e53e3e; font-size: 1.1rem; font-weight: 700; }
+        .no-ans { font-style: italic; color: #a0aec0; font-size: 0.85rem; }
+        td strong { color: #1a202c; }
+    </style>
+</head>
+<body>
+
+<div class="screen active" id="screen-start">
+    <div class="card">
+        <h1>🧮 Year 4 Mental Maths</h1>
+        <p class="subtitle">White Rose Aligned &nbsp;·&nbsp; 20 Questions</p>
+        <div class="instructions">
+            <strong>How it works:</strong><br>
+            • You have <strong>15 seconds</strong> for each question<br>
+            • Type your answer and tap <strong>Next</strong><br>
+            • The timer is there to help you practise — take a breath and give it your best! 🌟<br>
+            • You'll see a full breakdown at the end
+        </div>
+        <button class="btn-primary" onclick="startTest()">Start ▶</button>
+    </div>
+</div>
+
+<div class="screen" id="screen-question">
+    <div class="progress-wrap"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="q-header">
+        <span class="q-counter" id="q-counter">Question 1 of 20</span>
+        <div class="timer-ring">
+            <svg width="48" height="48" viewBox="0 0 48 48">
+                <circle class="ring-bg" cx="24" cy="24" r="20"/>
+                <circle class="ring-fg" id="ring-fg" cx="24" cy="24" r="20" stroke-dasharray="125.66" stroke-dashoffset="0"/>
+            </svg>
+            <div class="timer-number" id="timer-num">15</div>
+        </div>
+    </div>
+    <div class="question-box"><p class="question-text" id="question-text"></p></div>
+    <div class="time-up-notice" id="time-up-notice">⏰ Time's up — tap Next when you're ready</div>
+    <input class="answer-input" id="answer-input" type="number" inputmode="numeric" pattern="[0-9]*" placeholder="Your answer…" autocomplete="off">
+    <button class="btn-primary" onclick="nextQuestion()">Next →</button>
+</div>
+
+<div class="screen" id="screen-results">
+    <div class="card">
+        <h1 style="margin-bottom:22px;">How did you do? 🌟</h1>
+        <div class="score-wrap">
+            <div class="score-circle">
+                <span class="score-num" id="score-num">–</span>
+                <span class="score-denom">out of 20</span>
+            </div>
+            <p class="score-msg" id="score-msg"></p>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>#</th><th>Question</th><th>Your answer</th><th>Correct answer</th><th></th></tr></thead>
+                <tbody id="results-tbody"></tbody>
+            </table>
+        </div>
+        <button class="btn-secondary" onclick="startTest()">Try Again</button>
+    </div>
+</div>
+
+<script>
+const ALL_QUESTIONS = [
+    { q: "7 × 8 = ?", a: 56 }, { q: "9 × 6 = ?", a: 54 }, { q: "6 × 7 = ?", a: 42 },
+    { q: "8 × 8 = ?", a: 64 }, { q: "9 × 9 = ?", a: 81 }, { q: "11 × 7 = ?", a: 77 },
+    { q: "12 × 11 = ?", a: 132 }, { q: "12 × 8 = ?", a: 96 }, { q: "72 ÷ 9 = ?", a: 8 },
+    { q: "56 ÷ 7 = ?", a: 8 }, { q: "84 ÷ 12 = ?", a: 7 }, { q: "63 ÷ 9 = ?", a: 7 },
+    { q: "What is the value of the 4 in 3,427?", a: 400 },
+    { q: "What is the value of the 6 in 8,621?", a: 600 },
+    { q: "Write 5,000 + 300 + 40 + 7 as a number.", a: 5347 },
+    { q: "345 + 200 = ?", a: 545 }, { q: "1,250 + 400 = ?", a: 1650 },
+    { q: "800 − 350 = ?", a: 450 }, { q: "1,000 − 375 = ?", a: 625 },
+    { q: "What must I add to 450 to make 1,000?", a: 550 },
+    { q: "34 × 10 = ?", a: 340 }, { q: "23 × 100 = ?", a: 2300 },
+    { q: "560 ÷ 10 = ?", a: 56 }, { q: "4,700 ÷ 100 = ?", a: 47 },
+    { q: "Half of 96 = ?", a: 48 }, { q: "What is a quarter of 60?", a: 15 },
+    { q: "What is ¾ of 24?", a: 18 },
+    { q: "Round 3,678 to the nearest 100.", a: 3700 },
+    { q: "Round 4,452 to the nearest 1,000.", a: 4000 },
+    { q: "Round 2,750 to the nearest 1,000.", a: 3000 },
+];
+
+const TIME_LIMIT = 15;
+const CIRC = 2 * Math.PI * 20;
+let questions = [], currentQ = 0, userAnswers = [], timerInterval = null, timeLeft = 15;
+
+function shuffle(arr) {
+    const a = [...arr];
+    for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random()*(i+1)); [a[i],a[j]]=[a[j],a[i]]; }
+    return a;
+}
+function showScreen(id) { document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active')); document.getElementById(id).classList.add('active'); }
+
+function startTest() {
+    questions = shuffle(ALL_QUESTIONS).slice(0, 20);
+    currentQ = 0; userAnswers = [];
+    showScreen('screen-question'); loadQuestion();
+}
+
+function loadQuestion() {
+    document.getElementById('question-text').textContent = questions[currentQ].q;
+    document.getElementById('q-counter').textContent = `Question ${currentQ+1} of 20`;
+    document.getElementById('progress-fill').style.width = `${(currentQ/20)*100}%`;
+    const inp = document.getElementById('answer-input');
+    inp.value = ''; inp.disabled = false;
+    document.getElementById('time-up-notice').style.display = 'none';
+    startTimer(); setTimeout(()=>inp.focus(), 100);
+}
+
+function startTimer() {
+    clearInterval(timerInterval); timeLeft = TIME_LIMIT; updateTimer();
+    timerInterval = setInterval(()=>{ timeLeft--; updateTimer();
+        if(timeLeft<=0){ clearInterval(timerInterval); document.getElementById('time-up-notice').style.display='block'; }
+    }, 1000);
+}
+
+function updateTimer() {
+    const n = document.getElementById('timer-num'), r = document.getElementById('ring-fg');
+    n.textContent = Math.max(timeLeft,0);
+    r.style.strokeDashoffset = CIRC*(1-Math.max(timeLeft,0)/TIME_LIMIT);
+    if(timeLeft<=5){r.style.stroke='#e53e3e';n.style.color='#e53e3e';}
+    else if(timeLeft<=8){r.style.stroke='#dd6b20';n.style.color='#dd6b20';}
+    else{r.style.stroke='#4299e1';n.style.color='#2d3748';}
+}
+
+function nextQuestion() {
+    clearInterval(timerInterval);
+    const raw = document.getElementById('answer-input').value.trim();
+    userAnswers.push(raw===''?null:parseInt(raw,10));
+    currentQ++;
+    if(currentQ<20) loadQuestion(); else showResults();
+}
+
+function showResults() {
+    showScreen('screen-results');
+    let correct = 0;
+    const tbody = document.getElementById('results-tbody');
+    tbody.innerHTML = '';
+    userAnswers.forEach((ans,i)=>{
+        const q=questions[i], ok=ans!==null&&ans===q.a;
+        if(ok) correct++;
+        const tr=document.createElement('tr');
+        tr.className=ok?'row-correct':'row-wrong';
+        tr.innerHTML=`<td>${i+1}</td><td>${q.q}</td><td>${ans===null?'<span class="no-ans">no answer</span>':ans}</td><td><strong>${q.a}</strong></td><td>${ok?'<span class="tick">✓</span>':'<span class="cross">✗</span>'}</td>`;
+        tbody.appendChild(tr);
+    });
+    document.getElementById('score-num').textContent = correct;
+    const msgs=[[20,20,"Perfect score! Absolutely brilliant! 🏆"],[16,19,"Fantastic — nearly perfect! 🌟"],[12,15,"Really good effort. Let's practise those tricky ones. 💪"],[8,11,"A solid start — keep going! 😊"],[0,7,"Don't worry — that's what practice is for! 💛"]];
+    document.getElementById('score-msg').textContent = msgs.find(([lo,hi])=>correct>=lo&&correct<=hi)[2];
+}
+
+document.getElementById('answer-input').addEventListener('keydown',e=>{ if(e.key==='Enter') nextQuestion(); });
+</script>
+</body>
+</html>

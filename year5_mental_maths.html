@@ -1,0 +1,194 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Year 5 Mental Maths</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif; background: #f3f0fa; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 24px 16px; }
+        .screen { display: none; width: 100%; max-width: 580px; }
+        .screen.active { display: block; }
+        .card { background: white; border-radius: 24px; padding: 36px 32px; box-shadow: 0 6px 24px rgba(0,0,0,0.10); }
+        h1 { font-size: 1.9rem; color: #1a202c; margin-bottom: 6px; text-align: center; }
+        .subtitle { text-align: center; color: #718096; font-size: 1rem; margin-bottom: 28px; }
+        .instructions { background: #f3f0fa; border-left: 4px solid #805ad5; border-radius: 12px; padding: 18px 20px; margin-bottom: 28px; color: #44337a; line-height: 1.75; font-size: 0.97rem; }
+        .btn-primary { background: #805ad5; color: white; border: none; border-radius: 14px; padding: 18px; font-size: 1.15rem; font-weight: 700; cursor: pointer; width: 100%; transition: background 0.15s; }
+        .btn-primary:active { background: #6b46c1; }
+        .btn-secondary { background: white; color: #805ad5; border: 2px solid #805ad5; border-radius: 14px; padding: 16px; font-size: 1.05rem; font-weight: 700; cursor: pointer; width: 100%; margin-top: 18px; }
+        .progress-wrap { background: #e2e8f0; border-radius: 10px; height: 8px; margin-bottom: 18px; overflow: hidden; }
+        .progress-fill { background: #805ad5; height: 8px; border-radius: 10px; transition: width 0.4s ease; }
+        .q-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
+        .q-counter { font-size: 0.95rem; font-weight: 600; color: #718096; }
+        .timer-ring { position: relative; width: 48px; height: 48px; }
+        .timer-ring svg { transform: rotate(-90deg); }
+        .timer-ring circle { fill: none; stroke-width: 4; }
+        .ring-bg { stroke: #e2e8f0; }
+        .ring-fg { stroke: #805ad5; stroke-linecap: round; transition: stroke-dashoffset 1s linear, stroke 0.3s; }
+        .timer-number { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 1rem; font-weight: 700; color: #2d3748; }
+        .question-box { background: #f7fafc; border: 2px solid #e2e8f0; border-radius: 20px; padding: 36px 28px; margin-bottom: 18px; min-height: 130px; display: flex; align-items: center; justify-content: center; }
+        .question-text { font-size: 1.75rem; color: #1a202c; font-weight: 700; text-align: center; line-height: 1.4; }
+        .time-up-notice { display: none; background: #fff5f5; border: 2px solid #feb2b2; border-radius: 12px; padding: 12px 16px; text-align: center; color: #c53030; font-weight: 600; font-size: 0.95rem; margin-bottom: 14px; }
+        .answer-input { width: 100%; padding: 18px; font-size: 1.5rem; border: 3px solid #e2e8f0; border-radius: 14px; text-align: center; outline: none; background: white; color: #1a202c; margin-bottom: 14px; -webkit-appearance: none; }
+        .answer-input:focus { border-color: #805ad5; }
+        .score-wrap { display: flex; flex-direction: column; align-items: center; margin-bottom: 24px; }
+        .score-circle { width: 130px; height: 130px; border-radius: 50%; background: #f3f0fa; border: 6px solid #805ad5; display: flex; flex-direction: column; align-items: center; justify-content: center; margin-bottom: 14px; }
+        .score-num { font-size: 2.6rem; font-weight: 800; color: #6b46c1; line-height: 1; }
+        .score-denom { font-size: 0.9rem; color: #718096; }
+        .score-msg { color: #4a5568; font-size: 1rem; text-align: center; max-width: 340px; }
+        .table-wrap { overflow-x: auto; margin-top: 8px; }
+        table { width: 100%; border-collapse: collapse; font-size: 0.9rem; }
+        th { background: #f3f0fa; color: #6b46c1; padding: 11px 10px; text-align: left; font-weight: 700; }
+        td { padding: 11px 10px; border-bottom: 1px solid #e2e8f0; color: #4a5568; vertical-align: middle; }
+        tr.row-correct { background: #f0fff4; }
+        tr.row-wrong { background: #fff5f5; }
+        .tick { color: #38a169; font-size: 1.1rem; font-weight: 700; }
+        .cross { color: #e53e3e; font-size: 1.1rem; font-weight: 700; }
+        .no-ans { font-style: italic; color: #a0aec0; font-size: 0.85rem; }
+        td strong { color: #1a202c; }
+    </style>
+</head>
+<body>
+
+<div class="screen active" id="screen-start">
+    <div class="card">
+        <h1>🧮 Year 5 Mental Maths</h1>
+        <p class="subtitle">White Rose Aligned &nbsp;·&nbsp; 20 Questions</p>
+        <div class="instructions">
+            <strong>How it works:</strong><br>
+            • You have <strong>15 seconds</strong> for each question<br>
+            • Type your answer and tap <strong>Next</strong><br>
+            • Decimals? Use a dot — e.g. <strong>5.1</strong><br>
+            • Negative numbers? Use a minus — e.g. <strong>−7</strong><br>
+            • The timer is there to help you practise — take a breath! 🌟
+        </div>
+        <button class="btn-primary" onclick="startTest()">Start ▶</button>
+    </div>
+</div>
+
+<div class="screen" id="screen-question">
+    <div class="progress-wrap"><div class="progress-fill" id="progress-fill" style="width:0%"></div></div>
+    <div class="q-header">
+        <span class="q-counter" id="q-counter">Question 1 of 20</span>
+        <div class="timer-ring">
+            <svg width="48" height="48" viewBox="0 0 48 48">
+                <circle class="ring-bg" cx="24" cy="24" r="20"/>
+                <circle class="ring-fg" id="ring-fg" cx="24" cy="24" r="20" stroke-dasharray="125.66" stroke-dashoffset="0"/>
+            </svg>
+            <div class="timer-number" id="timer-num">15</div>
+        </div>
+    </div>
+    <div class="question-box"><p class="question-text" id="question-text"></p></div>
+    <div class="time-up-notice" id="time-up-notice">⏰ Time's up — tap Next when you're ready</div>
+    <input class="answer-input" id="answer-input" type="text" inputmode="decimal" placeholder="Your answer…" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+    <button class="btn-primary" onclick="nextQuestion()">Next →</button>
+</div>
+
+<div class="screen" id="screen-results">
+    <div class="card">
+        <h1 style="margin-bottom:22px;">How did you do? 🌟</h1>
+        <div class="score-wrap">
+            <div class="score-circle">
+                <span class="score-num" id="score-num">–</span>
+                <span class="score-denom">out of 20</span>
+            </div>
+            <p class="score-msg" id="score-msg"></p>
+        </div>
+        <div class="table-wrap">
+            <table>
+                <thead><tr><th>#</th><th>Question</th><th>Your answer</th><th>Correct answer</th><th></th></tr></thead>
+                <tbody id="results-tbody"></tbody>
+            </table>
+        </div>
+        <button class="btn-secondary" onclick="startTest()">Try Again</button>
+    </div>
+</div>
+
+<script>
+const ALL_QUESTIONS = [
+    { q: "7 × 12 = ?", a: 84 }, { q: "8 × 9 = ?", a: 72 }, { q: "11 × 12 = ?", a: 132 },
+    { q: "144 ÷ 12 = ?", a: 12 }, { q: "108 ÷ 9 = ?", a: 12 }, { q: "132 ÷ 11 = ?", a: 12 },
+    { q: "What is 10,000 more than 245,000?", a: 255000 },
+    { q: "What is 100,000 less than 832,000?", a: 732000 },
+    { q: "Round 347,561 to the nearest 10,000.", a: 350000 },
+    { q: "Round 284,300 to the nearest 100,000.", a: 300000 },
+    { q: "Round 63,480 to the nearest 1,000.", a: 63000 },
+    { q: "What is 1,000,000 − 1?", a: 999999 },
+    { q: "4,500 + 3,700 = ?", a: 8200 }, { q: "12,500 − 3,800 = ?", a: 8700 },
+    { q: "250,000 + 450,000 = ?", a: 700000 }, { q: "1,000,000 − 375,000 = ?", a: 625000 },
+    { q: "67,000 + 45,000 = ?", a: 112000 }, { q: "500,000 − 180,000 = ?", a: 320000 },
+    { q: "340 × 20 = ?", a: 6800 }, { q: "4,500 ÷ 9 = ?", a: 500 },
+    { q: "35 × 40 = ?", a: 1400 }, { q: "2,400 ÷ 6 = ?", a: 400 },
+    { q: "180 ÷ 12 = ?", a: 15 }, { q: "25 × 200 = ?", a: 5000 }, { q: "3,600 ÷ 4 = ?", a: 900 },
+    { q: "4.5 × 10 = ?", a: 45 }, { q: "0.07 × 100 = ?", a: 7 },
+    { q: "3.2 + 1.9 = ?", a: 5.1 }, { q: "8.5 − 3.7 = ?", a: 4.8 },
+    { q: "0.6 × 10 = ?", a: 6 }, { q: "12.4 − 5.6 = ?", a: 6.8 }, { q: "2.75 × 100 = ?", a: 275 },
+    { q: "What is 25% of 80?", a: 20 }, { q: "What is 50% of 360?", a: 180 },
+    { q: "What is 10% of 450?", a: 45 }, { q: "What is 75% of 200?", a: 150 },
+    { q: "What is 20% of 350?", a: 70 }, { q: "What is 1% of 600?", a: 6 },
+    { q: "⅖ of 40 = ?", a: 16 }, { q: "¾ of 120 = ?", a: 90 },
+    { q: "⅓ of 270 = ?", a: 90 }, { q: "⅗ of 45 = ?", a: 27 },
+    { q: "−5 + 8 = ?", a: 3 }, { q: "3 − 10 = ?", a: -7 }, { q: "−12 + 7 = ?", a: -5 },
+];
+
+const TIME_LIMIT = 15, CIRC = 2*Math.PI*20, TOL = 0.01;
+let questions=[], currentQ=0, userAnswers=[], timerInterval=null, timeLeft=15;
+
+function shuffle(arr){const a=[...arr];for(let i=a.length-1;i>0;i--){const j=Math.floor(Math.random()*(i+1));[a[i],a[j]]=[a[j],a[i]];}return a;}
+function showScreen(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');}
+function match(u,c){return Math.abs(u-c)<TOL;}
+
+function startTest(){questions=shuffle(ALL_QUESTIONS).slice(0,20);currentQ=0;userAnswers=[];showScreen('screen-question');loadQuestion();}
+
+function loadQuestion(){
+    document.getElementById('question-text').textContent=questions[currentQ].q;
+    document.getElementById('q-counter').textContent=`Question ${currentQ+1} of 20`;
+    document.getElementById('progress-fill').style.width=`${(currentQ/20)*100}%`;
+    const inp=document.getElementById('answer-input');inp.value='';inp.disabled=false;
+    document.getElementById('time-up-notice').style.display='none';
+    startTimer();setTimeout(()=>inp.focus(),100);
+}
+
+function startTimer(){
+    clearInterval(timerInterval);timeLeft=TIME_LIMIT;updateTimer();
+    timerInterval=setInterval(()=>{timeLeft--;updateTimer();
+        if(timeLeft<=0){clearInterval(timerInterval);document.getElementById('time-up-notice').style.display='block';}
+    },1000);
+}
+
+function updateTimer(){
+    const n=document.getElementById('timer-num'),r=document.getElementById('ring-fg');
+    n.textContent=Math.max(timeLeft,0);
+    r.style.strokeDashoffset=CIRC*(1-Math.max(timeLeft,0)/TIME_LIMIT);
+    if(timeLeft<=5){r.style.stroke='#e53e3e';n.style.color='#e53e3e';}
+    else if(timeLeft<=8){r.style.stroke='#dd6b20';n.style.color='#dd6b20';}
+    else{r.style.stroke='#805ad5';n.style.color='#2d3748';}
+}
+
+function nextQuestion(){
+    clearInterval(timerInterval);
+    const raw=document.getElementById('answer-input').value.trim();
+    userAnswers.push(raw===''?null:parseFloat(raw));
+    currentQ++;if(currentQ<20)loadQuestion();else showResults();
+}
+
+function showResults(){
+    showScreen('screen-results');let correct=0;
+    const tbody=document.getElementById('results-tbody');tbody.innerHTML='';
+    userAnswers.forEach((ans,i)=>{
+        const q=questions[i],ok=ans!==null&&match(ans,q.a);
+        if(ok)correct++;
+        const tr=document.createElement('tr');tr.className=ok?'row-correct':'row-wrong';
+        const dc=Number.isInteger(q.a)?q.a:q.a.toFixed(2).replace(/\.?0+$/,'');
+        tr.innerHTML=`<td>${i+1}</td><td>${q.q}</td><td>${ans===null?'<span class="no-ans">no answer</span>':ans}</td><td><strong>${dc}</strong></td><td>${ok?'<span class="tick">✓</span>':'<span class="cross">✗</span>'}</td>`;
+        tbody.appendChild(tr);
+    });
+    document.getElementById('score-num').textContent=correct;
+    const msgs=[[20,20,"Perfect score — absolutely outstanding! 🏆"],[16,19,"Brilliant work — nearly perfect! 🌟"],[12,15,"Really solid effort. Let's work on those tricky ones. 💪"],[8,11,"Good start — keep practising! 😊"],[0,7,"Don't worry — that's exactly what practice is for! 💛"]];
+    document.getElementById('score-msg').textContent=msgs.find(([lo,hi])=>correct>=lo&&correct<=hi)[2];
+}
+
+document.getElementById('answer-input').addEventListener('keydown',e=>{if(e.key==='Enter')nextQuestion();});
+</script>
+</body>
+</html>
